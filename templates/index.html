@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Cluster: {{ cluster_name }}</h1>
+        <p><strong>Prompt:</strong> {{ prompt }}</p>
+        <p><strong>Answer:</strong> {{ answer }}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Split</th>
+                    <th>Revise</th>
+                    <th>Relevance</th>
+                    <th>Rate Google Search</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table_data %}
+                <tr>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2>Output Data</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Supported</th>
+            <th>Not Supported</th>
+            <th>Irrelevant</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ output_dict.supported }}</td>
+            <td>{{ output_dict.not_supported }}</td>
+            <td>{{ output_dict.irrelevant }}</td>
+        </tr>
+    </tbody>
+</table>
+        <form action="/navigate" method="POST">
+            <input type="hidden" name="entry_index" value="{{ entry_index }}">
+            <button type="submit" name="action" value="backward">Previous</button>
+            <button type="submit" name="action" value="forward">Next</button>
+            <input type="number" name="entry_index_input" min="0" max="{{ dataset_length - 1 }}" placeholder="Go to entry">
+            <button type="submit" name="action" value="go">Go</button>
+        </form>
+    </div>
+</body>
+</html>
