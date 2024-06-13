@@ -1,11 +1,19 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import json
+import os
 
 app = Flask(__name__)
+file_name = ''
 
-# Load the dataset
-df = pd.read_csv('data/dataset.csv')
+# Load the JSON files
+data_folder = 'clusters_data'
+json_files = [f for f in os.listdir(data_folder) if f.endswith('.json')]
+data = []
+for file in json_files:
+    with open(os.path.join(data_folder, file), 'r') as f:
+        # file_name = file
+        data.append(json.load(f))
 
 
 @app.route('/')
@@ -13,19 +21,23 @@ df = pd.read_csv('data/dataset.csv')
 def view_entry(entry_index=0):
     if entry_index < 0:
         entry_index = 0
-    if entry_index >= len(df):
-        entry_index = len(df) - 1
-    entry = df.iloc[entry_index]
-    cluster_name = entry['name_of_cluster']
-    prompt = entry['representative_prompt']
-    answer = entry['representative_answer']
-    safe_dict = json.loads(entry['safe_dict'])
-    table_data = [[d['split'], d['revise'], d['relevance'],
-                   d['rate_google_search']] for d in safe_dict]
-    dataset_length = len(df)
-    output_dict = json.loads(entry['output_dict'])
-    return render_template('index.html', entry_index=entry_index, cluster_name=cluster_name,
-                           prompt=prompt, answer=answer, table_data=table_data, output_dict=output_dict, dataset_length=dataset_length)
+    if entry_index >= len(data):
+        entry_index = len(data) - 1
+    entry = data[entry_index]
+
+    prompt = entry['prompt']
+    response = entry['response']
+    checked_statements = entry['checked_statements']
+    supported = entry['Supported']
+    not_supported = entry['Not Supported']
+    irrelevant = entry['Irrelevant']
+    dataset_length = len(data)
+    file_name = entry_index
+
+    return render_template('index.html', entry_index=entry_index, prompt=prompt,
+                           response=response, checked_statements=checked_statements,
+                           supported=supported, not_supported=not_supported,
+                           irrelevant=irrelevant, dataset_length=dataset_length, file_name=file_name)
 
 
 @app.route('/navigate', methods=['POST'])
